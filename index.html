@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- WEB3 Magic -->
+    <script
+      charset="utf-8"
+      src="https://cdn.ethers.io/scripts/ethers-v4.min.js"
+      type="text/javascript"
+    ></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Web3-Ecommerce</title>
+  </head>
+  <body>
+    <div class="w-32 md:w-32 lg:w-64">
+      <div
+        class="p-3"
+        style="border: 1px solid gold; width: 250px; padding: 20px; flex: 4"
+      >
+        <img
+          style="width: 200px; height: auto"
+          src="https://media.istockphoto.com/photos/blue-book-stack-picture-id1290063471?b=1&k=20&m=1290063471&s=170667a&w=0&h=oLiQoa2Ewu9HKfBJzzvInI41vei54HLoEakxvIJvnsg="
+        />
+        <p class="text-3xl font-bold underline">Solidity 101 course</p>
+        <p class="p-1">Author:Anish Jain</p>
+        <p class="p-1">
+          Description:this book teaches you about the basic and advnace concepts
+          about solidity progamming language
+        </p>
+        <p class="p-1">price:10$</p>
+        <button
+          onclick="addItemToCart(0)"
+          class="p-2 border border-indigo-600 rounded"
+          id="add"
+        >
+          Add
+        </button>
+        <button class="p-2 border border-indigo-600 rounded" id="buy">
+          Buy
+        </button>
+      </div>
+      <button
+        onclick="pay()"
+        class="p-2 border border-indigo-600 rounded"
+        id="pay"
+      >
+        Pay
+      </button>
+      <button
+        class="p-2 border border-indigo-600 rounded"
+        onclick="getExchangeRates(10)"
+      >
+        GET EXCHANGES
+      </button>
+
+      <button
+        class="p-2 border border-indigo-600 rounded"
+        onclick="getProducts()"
+      >
+        GET PRODUCTS
+      </button>
+    </div>
+  </body>
+
+  <!-- ABI FILE  -->
+  <script src="ecomContractABI.js"></script>
+  <!-- Exchange rates -->
+  <script src="getExchangeRates.js"></script>
+
+  <script>
+    // init web3
+    window.ethereum.enable();
+    // providers = ['mainnet','rinkeby','ropsten', 'kovan', 'goerli']
+    var provider = new ethers.providers.Web3Provider(
+      web3.currentProvider,
+      "rinkeby"
+    );
+
+    const ecomContractAddress = "0xB2d367117b9B53DD1ceeDe3dc7747E13092ECD25";
+
+    let senderAddress;
+
+    // get account address
+    provider.listAccounts().then((accounts) => {
+      console.log("Accounts", accounts);
+      signer = provider.getSigner(accounts[0]);
+      senderAddress = accounts[0];
+
+      // create contract instance
+      contract = new ethers.Contract(
+        ecomContractAddress,
+        ecomContractABI,
+        signer
+      );
+    });
+
+    // get products
+    async function getProducts() {
+      contract.products(0).then((products) => {
+        console.log("products", products);
+      });
+    }
+
+    // create async function to add items to 'blockchain' cart
+    async function addItemToCart(itemId) {
+      const tx = await contract.addItemToCart(itemId);
+      console.log("tx", tx);
+    }
+
+    async function pay() {
+      try {
+        const tx = await contract.pay({
+          // value: ethers.utils.parseEther("1"),
+          value:"0x100000000000000"
+        });
+        console.log("tx", tx);
+      } catch (error) {
+        alert(error.message);
+        console.log("ERROR", error.message, error);
+      }
+    }
+  </script>
+</html>
